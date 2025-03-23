@@ -1,0 +1,7 @@
+__pycache__
+resources/
+out/
+*.fls
+*.pdf
+**.log
+out/
