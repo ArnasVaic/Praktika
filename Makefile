@@ -1,4 +1,4 @@
-NAME:=bakalaurinis
+NAME:=ataskaita
 TEX_NAME:=$(NAME).tex
 PDF_NAME:=$(NAME).pdf
 LATEXMK_BASE_FLAGS:=-lualatex -file-line-error -Werror -emulate-aux-dir -aux-directory=out
