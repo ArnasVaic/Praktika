@@ -10,4 +10,22 @@
 \newcommand{\ee}{{\mathrm e}}  % nice exponent
 \newcommand{\RR}{\mathbb{R}}
 
-\input{setups/veikla}
+\newenvironment{activities}{
+    \newcommand{\veikla}[1]{\gdef\Veikla{##1}}
+    \newcommand{\aprasymas}[1]{\gdef\Aprasymas{##1}}
+    \newcommand{\rezultatai}[1]{\gdef\Rezultatai{##1}}
+
+    \def\Veikla{}
+    \def\Aprasymas{}
+    \def\Rezultatai{}
+
+    \newcommand{\row}{
+        \subsection{\Veikla}
+        \subsubsection*{Veiklos aprašymas} 
+        \Aprasymas
+        \subsubsection*{Veiklos rezultatai} 
+        \Rezultatai
+    }
+}
+
+% \input{setup/veikla}
