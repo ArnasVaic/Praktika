@@ -2,19 +2,20 @@
 config:
   layout: elk
   look: classic
-  theme: dark
 ---
 stateDiagram-v2
-    state "Taisyklių rašytojų poreikių analizė" as req_analysis
+    state "Rašytojų poreikių analizė" as req_analysis
+    state "Technologinių sprendimų analizė" as tech_analysis
     state "Įrankių projektavimas" as tool_design
     state "Įrankių įgyvendinimas" as tech_choice
     state "Įrankių testavimas" as testing
     state "Diegimo infrastruktūros ruošimas" as infra
-    state "Artefaktų ruošimas ir įkėlimas" as install
+    state "Įrankių ruošimas diegimui" as install
     state "Dokumentacijos ruošimas" as docs
 
     [*] --> req_analysis
-    req_analysis --> tool_design
+    req_analysis --> tech_analysis
+    tech_analysis --> tool_design
     tool_design --> tech_choice
     tech_choice --> testing
     testing --> infra

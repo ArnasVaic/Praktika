@@ -1,7 +1,49 @@
 \section{Praktikos veiklos aprašymas}
 
 \begin{activities}
-    \veikla{X}
-    \aprasymas{Y}
-    \rezultatai{Z} \row
+
+    \veikla{Rašytojų poreikių analizė}
+    \aprasymas{
+       
+        Šios veiklos tikslas buvo identifikuoti pagrindines dabartinių įrankių problemas, kurios trugdo efektyviai rašyti taisykles. Kadangi nėra daug žmonių rašančių šias taisykles ši informacija buvo išgauta laisvos formos diskusijos metu su taisyklių rašytojais. Buvo identifikuoti šie trūkumai:
+
+        \begin{itemize}
+            \item Taisyklių rašymas viename \textit{Excel} faile nepalieka beveik jokių galimybių integruoti rašymo procesą su moderniais versijavimo įrankiais tokiais kaip \textit{Git}, todėl pokyčių ir klaidų atsekamumas yra sunkiai įgyvendinamas
+            \item Taisyklių rašymas viename \textit{Excel} faile nesudaro gerų sąlygų keliems rašytojams vienu metu keisti taisykles
+            \item Rašant taisykles viename \textit{Excel} faile nėra priemonių automatiškai patikrinti parašytų išraiškų sintaksinį ir semantinį korektiškumą
+            \item Dabartinis interpretatorius, kuris įvykdyti aprašytas taisykles praneša tik apie pirmą pasitaikiusią klaidą, todėl klaidų taisymas užima daugiau laiko nei turėtų
+        \end{itemize}
+    }
+    \rezultatai{
+        Identifikuotos pagrindinės dabartinio taisyklių rašymo įrankių bei proceso problemos.
+    } \row
+
+    \veikla{Technologinių sprendimų analizė}
+    \aprasymas{
+        Šios veiklos tikslas buvo išsiaiškinti kokie technologiniai sprendimai tenktintų taisyklių rašytojų poreikius. Buvo svarstomi du pasirinkimai:
+
+        \begin{itemize}
+            \item Integruotos vystymo aplinkos (\textit{angl. Integrated Development Environment, IDE}) kūrimas - tai būtų kompiuterinė aplikacija, kuri apimtu visą taisyklių rašytojų darbo ciklą, nuo taisyklių rašymo, versijavimo bei paleidimo ir testavimo.  
+            \item Dalykinės srities kalbos kompiliatoriaus (\textit{angl. Domain Specific Language Compiler}) kūrimas - tai būtų konsolinė aplikacija, kuri gebėtų paversti paprastu tekstiniu formatu rašytoju parašytas taisykles į specifinį formatą, kurį po to galima pateikti jau egzistuojančiam taisyklių interpretatoriui. Tokiu būdu būtų pernaudojami jau egzistuojantys įrankiai.
+        \end{itemize}
+
+        Pirmasis sprendimas buvo atmestas dėl didelio kompleksiškumo, apimties bei žmogiškųjų išteklių trūkumo. Antrasis sprendimas pasirodė ypatingai patrauklus dėl to, kad taisyklių rašymas įprastuose tekstiniuose failuose leistų naudoti tokius įrankius kaip VSCode. Šis įrankis pagrinde naudojamas rašyti programinį kodą, jį paleisti ir ieškoti klaidų (\textit{angl. debug}). Taip pat turi integraciją su Git versijavimo sistema bei turi infrastruktūra pritaikytų įskiepių kūrimui. Dėl šių priežasčių buvo pasirinktas antrasis sprendimas ir kiti variantai nebebuvo svarstomi.
+    }
+    \rezultatai{
+        Pasirinktas technologinis sprendimas - dalykinės srities kalbos kompiliatorius.
+    } \row
+
+    \veikla{Įrankių projektavimas}
+    \aprasymas{
+        Šios veiklos tikslas buvo suprojektuoti dalykinės srities kompiliatorių atsižvelgiant
+    }
+    \rezultatai{
+
+    } \row
+
+    % template
+    % \veikla{}
+    % \aprasymas{}
+    % \rezultatai{} \row
+
 \end{activities}
