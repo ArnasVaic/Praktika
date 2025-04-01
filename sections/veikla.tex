@@ -25,7 +25,7 @@
             
             \item Norint užtikrinti sklandžią taisyklių modulių sąveiką, turėtų būti įmanoma apibrėžti kontraktą, kurio privalo laikytis moduliai. Taip jie galės sąveikauti vadovaudamiesi juodosios dėžės (\textit{angl. black box}) principu. Modulio sąsaja (\textit{angl. interface}), kaip ją vadinsime, iš esmės yra analogiška sąsajoms kitose programavimo kalbose.
 
-            \item Skirtingi klientai gali turėti specifines buhalterinių skaičiavimų taisykles todėl svarbu kiekvienam klientui turėti konfigūracinį failą, kuriame būtų nurodyti reikalingi taisyklių moduliai. Tokiu būdu būtų rašomas save dokumentuojantis kodas, kuris duotų indikaciją rašytojui, kuo specifinis klientas išsiskiria iš kitų
+            \item Skirtingi klientai gali turėti specifines buhalterinių skaičiavimų taisykles todėl svarbu kiekvienam klientui turėti konfigūracinį failą, kuriame būtų nurodyti reikalingi taisyklių moduliai. Tokiu būdu būtų rašomas save dokumentuojantis kodas, kuris duotų indikaciją rašytojui, kuo specifinis klientas išsiskiria iš kitų. Šiuos konfigūraciniais failais vadinsime \textit{profiliais}
             
             \item Taisykles apdorojantis įrankius turėtų gebėti patikrinti įprastas sintaksės bei semantines taisykles, kurių principu buhalterinės taisyklės bus rašomos viename faile, todėl kartu reikėtų apibrėžti ir formalią gramatiką taisyklių moduliams bei sąsajoms
 
@@ -56,7 +56,24 @@
 
     \veikla{Įrankių projektavimas}
     \aprasymas{
-        Šios veiklos tikslas buvo suprojektuoti dalykinės srities kompiliatorių atsižvelgiant į rašytojų
+        Šios veiklos tikslas buvo suprojektuoti dalykinės srities kompiliatorių ir susijusius įrankius atsižvelgiant į rašytojų išreikštus poreikius bei problemas su dabartiniais įrankiais skirtus darbui su taisyklėmis. Iš viso numatyti du įrankiai:
+
+        \begin{itemize}
+            \item Dalykinės srities kalbos kompiliatorius - konsolinė aplikacija, kuria būtų galima parsisiųsti ir įdiegti rankiniu būdu. Šis įrankis būtų rašomas su \textit{.NET} technologija pagrinde dėl to, nes ji įmonėje yra naudojama dažniausiai
+ 
+            \item Sintaksės ryškinimo įskiepis teksto redaktoriui \textit{VSCode} - jį būtų galima atsisiųsti per \textit{VSCode} įskiepių naršyklę. Visi \textit{VSCode} įskiepiai yra įgyvendinami naudojant \textit{TypeScript} kalbą, todėl šis įskiepis irgi nėra išimtis
+        \end{itemize}
+
+        \subsubsection{Dalykinės srities kompiliatorius}
+
+        Taisyklių kompiliatoriaus funkcija yra sukompiliuoti nurodytą profilį - visus modulius ir sąsajas, kurias jis aprašo. Iš poreikio sintaksės bei semantinių klaidų tikrinimui taip pat galime įvertinti, kad kompiliatoriuje turės būti lekserio bei parserio komponentai, kurie failuose parašytas taisykles galėtų suvesti į abstrakčios sintaksės medžio struktūra, kuriai būtų galima vykdyti korektiškumo tikrinimą. Šio proceso rezultatas yra vienas failas, kuriame informacija yra saugoma specifiniu formatu, kuris nėra aktualus šiai ataskaitai, tačiau ši dalis reikalaus komponento, kuris abstraktų sintaksės medį paverstų į minėta formatą. Aprašyta kompiliatoriaus darbo eiga nurodyta \ref{fig:compiler-flow}-ame pavyzdyje.
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.5\textwidth]{diagrams/compiler-flow.png}
+            \caption{Dalykinės srities kompiliatoriaus kompiliavimo proceso eiga}
+            \label{fig:compiler-flow}
+        \end{figure}
     }
     \rezultatai{
 
