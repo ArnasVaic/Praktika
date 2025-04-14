@@ -64,7 +64,7 @@
             \item Sintaksės ryškinimo įskiepis teksto redaktoriui \textit{VSCode} - jį būtų galima atsisiųsti per \textit{VSCode} įskiepių naršyklę. Visi \textit{VSCode} įskiepiai yra įgyvendinami naudojant \textit{TypeScript} kalbą, todėl šis įskiepis irgi nėra išimtis
         \end{itemize}
 
-        \subsubsection{Dalykinės srities kompiliatorius}
+        \subsubsection{Dalykinės srities kompiliatoriaus architektūra}
 
         Taisyklių kompiliatoriaus funkcija yra sukompiliuoti nurodytą profilį - visus modulius ir sąsajas, kurias jis aprašo. Iš poreikio sintaksės bei semantinių klaidų tikrinimui taip pat galime įvertinti, kad kompiliatoriuje turės būti lekserio bei parserio komponentai, kurie failuose parašytas taisykles galėtų suvesti į abstrakčios sintaksės medžio struktūra, kuriai būtų galima vykdyti korektiškumo tikrinimą. Šio proceso rezultatas yra vienas failas, kuriame informacija yra saugoma specifiniu formatu, kuris nėra aktualus šiai ataskaitai, tačiau ši dalis reikalaus komponento, kuris abstraktų sintaksės medį paverstų į minėta formatą. Aprašyta kompiliatoriaus darbo eiga nurodyta \ref{fig:compiler-flow}-ame pavyzdyje.
 
@@ -74,10 +74,107 @@
             \caption{Dalykinės srities kompiliatoriaus kompiliavimo proceso eiga}
             \label{fig:compiler-flow}
         \end{figure}
+
+        \paragraph{Lekserio ir parserio architektūra ir naudotos technologijos}
+
+        Šie komponentai buvo įgyvendinti iš funkcinio programavimo paradigmos kilusiais parserių kombinatoriais (\textit{angl. parser combinators}). Šios konstrukcijos veikia pagal principą, kai mažesni, elementarūs parseriai yra sudedami į sudėtingesnes struktūras, naudojant funkcijas kaip kompozicijos priemones. Kiekvienas parseris yra funkcija, kuri gauna įvesties eilutę ir bando iš jos išgauti tam tikrą struktūrinę reikšmę, grąžindamas sėkmės arba nesėkmės rezultatą kartu su likusia analizuojama įvestimi. Kombinatoriai leidžia sujungti šiuos parserius į hierarchines sistemas, kad būtų galima apdoroti sudėtingesnes sintaksines konstrukcijas, pavyzdžiui, aritmetines išraiškas arba norimų sakinių sintaksę. 
+        
+        Parserių kombinatoriai yra naudojami ne tik funkciniame programavime - \textit{.NET} ekosistemoje egzistuoja keletas bibliotekų kurios įgyvendina šias konstrukcijas. Komandoje nusprendėme pasirinkti populiariausią ir plačiausiai naudojama biblioteką - \textit{Superpower}. Ši biblioteka inovatyviai panaudoja \textit{C\#} kalbos konstrukciją \textit{LINQ (angl. Language Integrated Query)} lyg tai būtų Haskell kalbos \textit{do} konstrukcija, kas leidžia elegantiškai aprašyti sudėtingus parserius. Abu komponentai -- lekseris ir parseris įgyvendinti šiuo principu, o pavizdį kaip tai atrodo, galima matyti \ref{fig:combinator-example}-ame pavyzdyje.
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{diagrams/combinator-example.png}
+            \caption{Parserio implementaciją vardo srities sakiniui parašyta naudojant \textit{C\#} kalbą}
+            \label{fig:combinator-example}
+        \end{figure}
+
+        \newpage
+
+        \paragraph{Modulių ir sąsajų apjungimo bei semantinio korektiškumo patikros komponentai}
+
+        Pagrindinė šių komponentų funkcija yra suteikti kompiliatoriui gebėjimą patikrinti taisyklių korektiškumą, kurios referuoja į taisykles aprašytas kituose moduliuose -- tai yra esminis komponentas, kuris įgalina moduliškumą. Apjungimo komponentas suagreguoja sakinius iš skirtingų modulių į vieną didelę struktūra, kuri tada yra perduodama patikros komponentui, kur tuomet yra tikrinami tokie tarpmoduliniai ryšiai. Patikros komponentas taip pat individualiai tikrina modulių bei sąsajų vindinį semantinį korektiškumą -- kad taisyklės su tokiu pat vardu nebūtų aprašytos du kartus, kad visos sąsajoje nurodytos taisyklės būtų įgyvendintos modulyje ir \hbox{t. t.}
+
+        Iš technologinės pusės šie moduliai nėra ypatingi, jų įgyvendinimui buvo taikomi standartinės imperatyvaus programavimo kalbų struktūros ir algoritmai.
+    
+        \subsubsection{Sintaksės ryškinimo įskiepis}
+
+        \textit{VSCode} ekosistema suteikia visus reikiamus įrankius kurti pritaikytus sintaksės ryškinimo įrankius. Tai galima padaryti deklaratyviu stiliumi aprašant visų atpažįstamų žetonų formatą \textit{Regex} formatu. Visa ši konfigūracija laikoma viename \textit{JSON} formato faile kaip pavaizduota \ref{fig:vscode-theme}-ame pavyzdyje. Kaip atrodo galutinis sintaksės ryškinimo rezultatas teksto redaktoriuje \textit{VSCode} galima matyti \ref{fig:themed-logis-code}-ame pavyzdyje.
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{diagrams/vscode-theme.png}
+            \caption{Konfigūracija leidžianti atpažinti skirtingus žetonus \textit{VSCode} teksto redaktoriuje}
+            \label{fig:vscode-theme}
+        \end{figure}
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{diagrams/theme-example.png}
+            \caption{Dalykinės srities kalbos kodas paryškintas \textit{VSCode} teksto redaktoriuje}
+            \label{fig:themed-logis-code}
+        \end{figure}
+
     }
     \rezultatai{
-
+        Suprojektuoti du įrankiai - dalykinės srities kalbos kompiliatorius ir sintaksės ryškinimo įskiepis \textit{VSCode} teksto redaktoriui. Aprašyta dalykinės srities kalbos kompiliatoriaus architektūra, naudojamos technologijos bei komponentai.
     } \row
+
+    \veikla{Diegimo infrastruktūros ruošimas}
+    \aprasymas{
+
+        \subsubsection{Dalykinės srities kompiliatoriaus diegimo infrastruktūra}
+
+        Šios veiklos tikslas buvo paruošti infrastruktūrą, kuri leistų automatizuoti įrankių diegimo procesą. Tam buvo pasitelktas \textit{GitHub Actions} funkcionalumas, kuris leidžia aprašyti automatizuotus darbo srautus (\textit{angl. workflows}). Naudojant šią technologiją, buvo sukurtas darbo srautas, kuris leidžia rankiniu būdu paleisti procesą, kuris sukompiliuoja dalykinės srities kalbos kompiliatorių ir sugeneruoja vykdomąjį failą. Šis failas yra įkeltas kaip išleidimo artefaktas (\textit{angl. release artifact}), kurį vartotojai gali atsisiųsti iš \textit{GitHub} platformos. Tokiu būdu užtikrinama, kad visada būtų prieinamas naujausias įrankio variantas, o diegimo procesas būtų paprastas ir efektyvus.
+
+        \subsection{Sintaksės ryškinimo įskiepio diegimo infrastruktūra}
+
+        \subsubsection{Sintaksės ryškinimo įskiepio diegimo infrastruktūra}
+
+        Šios veiklos tikslas buvo paruošti infrastruktūrą, kuri leistų automatiškai publikuoti sintaksės ryškinimo įskiepį į \textit{VSCode} įskiepių parduotuvę (\textit{Visual Studio Code Marketplace}). Tam buvo pasitelktas \textit{GitHub Actions} funkcionalumas, kuris leidžia aprašyti automatizuotus darbo srautus (\textit{angl. workflows}). Naudojant šią technologiją, buvo sukurtas darbo srautas, kuris:
+
+        \begin{itemize}
+            \item Patikrina, ar įskiepio šaltinio kodas atitinka reikalavimus (pvz., ar nėra klaidų, ar laikomasi kodo stiliaus taisyklių).
+            \item Sukompiliuoja įskiepį į reikiamą formatą (\textit{.vsix} failą).
+            \item Automatiškai publikuoja įskiepį į \textit{Visual Studio Code Marketplace}, naudojant \textit{vsce} įrankį ir \textit{Personal Access Token} (PAT), kuris yra saugomas kaip \textit{GitHub Secrets}.
+        \end{itemize}
+
+        Darbo srauto konfigūracija buvo aprašyta \textit{YAML} formatu. Pavyzdys, kaip atrodo šis darbo srautas:
+
+        \begin{minted}{yaml}
+        name: Publish logis-lang
+        on: workflow_dispatch
+
+        jobs:
+            publish:
+                name: Publish logis-lang
+                runs-on: ubuntu-latest
+
+                steps:
+                    - name: Checkout repository
+                        uses: actions/checkout@v2
+
+                    - name: Set up Node.js
+                        uses: actions/setup-node@v2
+                        with:
+                            node-version: 22
+
+                    - name: Install dependencies
+                        run: npm install
+
+                    - name: Install vsce
+                        run: npm install -g @vscode/vsce
+
+                    - name: Package extension
+                        run: vsce package
+
+                    - name: Publish extension
+                        run: vsce publish --allow-missing-repository --skip-license -p ${{ secrets.PUBLISHER_PERSONAL_ACCESS_TOKEN }}
+        \end{minted}
+
+        Šis darbo srautas užtikrina, kad įskiepis būtų publikuojamas rankiniu būdu paleidus darbo srautą per \textit{GitHub Actions} sąsają. Tokiu būdu vartotojai visada turės prieigą prie naujausios įskiepio versijos.
+
+    }
+    \rezultatai{} \row
 
     % template
     % \veikla{}

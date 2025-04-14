@@ -1,7 +1,7 @@
 NAME:=main
 TEX_NAME:=$(NAME).tex
 PDF_NAME:=ArnasVaicekauskasPA2025
-LATEXMK_BASE_FLAGS:=-lualatex -file-line-error -Werror -emulate-aux-dir -aux-directory=out
+LATEXMK_BASE_FLAGS:=-lualatex -file-line-error -Werror -emulate-aux-dir -aux-directory=out --shell-escape
 
 .PHONY: pdf
 pdf:
