@@ -98,13 +98,20 @@
     
         \subsubsection{Sintaksės ryškinimo įskiepis}
 
-        \textit{VSCode} ekosistema suteikia visus reikiamus įrankius kurti pritaikytus sintaksės ryškinimo įrankius. Tai galima padaryti deklaratyviu stiliumi aprašant visų atpažįstamų žetonų formatą \textit{Regex} formatu. Visa ši konfigūracija laikoma viename \textit{JSON} formato faile kaip pavaizduota \ref{fig:vscode-theme}-ame pavyzdyje. Kaip atrodo galutinis sintaksės ryškinimo rezultatas teksto redaktoriuje \textit{VSCode} galima matyti \ref{fig:themed-logis-code}-ame pavyzdyje.
+        \textit{VSCode} ekosistema suteikia visus reikiamus įrankius kurti pritaikytus sintaksės ryškinimo įrankius. Tai galima padaryti deklaratyviu stiliumi aprašant visų atpažįstamų žetonų formatą \textit{Regex} formatu. Visa ši konfigūracija laikoma viename \textit{JSON} formato faile. Kaip sukonfiguruotas raktažodžių bei konstantinių simbolių eilučių ryškinimas pavaizduota \ref{fig:theme-config-keyword}-ame bei \ref{fig:theme-config-string} pavyzdžiuose. Kaip atrodo galutinis sintaksės ryškinimo rezultatas teksto redaktoriuje \textit{VSCode} galima matyti \ref{fig:themed-logis-code}-ame pavyzdyje.
 
         \begin{figure}
             \centering
-            \includegraphics[width=\textwidth]{diagrams/vscode-theme.png}
-            \caption{Konfigūracija leidžianti atpažinti skirtingus žetonus \textit{VSCode} teksto redaktoriuje}
-            \label{fig:vscode-theme}
+            \includegraphics[width=\textwidth]{images/string-config.png}
+            \caption{Konfigūracija raktažodžių ryškinimui \textit{VSCode} teksto redaktoriuje}
+            \label{fig:theme-config-keyword}
+        \end{figure}
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{images/keyword-config.png}
+            \caption{Konfigūracija konstatinių simbolių eilučių ryškinimui \textit{VSCode} teksto redaktoriuje}
+            \label{fig:theme-config-string}
         \end{figure}
 
         \begin{figure}
@@ -122,59 +129,55 @@
     \veikla{Diegimo infrastruktūros ruošimas}
     \aprasymas{
 
+        Diegimo infrastruktūra abiems įrankiams buvo paruošta naudojant \textit{GitHub} platformą, kuri leidžia automatizuoti diegimo procesus naudojant \textit{GitHub Actions} funkcionalumą. Ši platforma leidžia kurti automatizuotus darbo srautus (\textit{angl. workflows}), kurie gali būti paleidžiami automatiškai arba rankiniu būdu. \textit{GitHub Actions} leidžia aprašyti darbo srautus naudojant \textit{YAML} sintaksę, kas leidžia lengvai konfigūruoti ir valdyti automatizuotus procesus.
+
         \subsubsection{Dalykinės srities kompiliatoriaus diegimo infrastruktūra}
 
-        Šios veiklos tikslas buvo paruošti infrastruktūrą, kuri leistų automatizuoti įrankių diegimo procesą. Tam buvo pasitelktas \textit{GitHub Actions} funkcionalumas, kuris leidžia aprašyti automatizuotus darbo srautus (\textit{angl. workflows}). Naudojant šią technologiją, buvo sukurtas darbo srautas, kuris leidžia rankiniu būdu paleisti procesą, kuris sukompiliuoja dalykinės srities kalbos kompiliatorių ir sugeneruoja vykdomąjį failą. Šis failas yra įkeltas kaip išleidimo artefaktas (\textit{angl. release artifact}), kurį vartotojai gali atsisiųsti iš \textit{GitHub} platformos. Tokiu būdu užtikrinama, kad visada būtų prieinamas naujausias įrankio variantas, o diegimo procesas būtų paprastas ir efektyvus.
-
-        \subsection{Sintaksės ryškinimo įskiepio diegimo infrastruktūra}
+        Šiam įrankiui buvo paruoštas rankiniu būdu paleidžiamas darbo srautas, kuris nukopijuoja repozitorijoje esantį kodą, jį sukompiliuoja ir sugeneruoja vykdomąjį failą kartu su reikalingomis dinaminėmis bibliotekomis. Šie failai yra įkelti kaip vienas išleidimo artefaktas (\textit{angl. release artifact}), kurį vartotojai gali atsisiųsti iš \textit{GitHub} platformos. Tokiu būdu užtikrinama, kad visada būtų prieinamas naujausias įrankio variantas, o diegimo procesas būtų paprastas ir efektyvus. 
 
         \subsubsection{Sintaksės ryškinimo įskiepio diegimo infrastruktūra}
 
-        Šios veiklos tikslas buvo paruošti infrastruktūrą, kuri leistų automatiškai publikuoti sintaksės ryškinimo įskiepį į \textit{VSCode} įskiepių parduotuvę (\textit{Visual Studio Code Marketplace}). Tam buvo pasitelktas \textit{GitHub Actions} funkcionalumas, kuris leidžia aprašyti automatizuotus darbo srautus (\textit{angl. workflows}). Naudojant šią technologiją, buvo sukurtas darbo srautas, kuris:
+        Šiam įrankiui taip pat buvo paruoštas rankiniu būdu paleidžiamas darbo srautas, kuris publikuoja įskiepį į \textit{Visual Studio Code Marketplace} parduotuvę. 
+
+    } \rezultatai{
+        Paruošta infrastruktūra, leidžianti automatizuoti dalykinės srities kalbos kompiliatoriaus ir sintaksės ryškinimo įskiepio diegimo procesą. Sukurtas \textit{GitHub Actions} darbo srautas, leidžiantis sukompiliuoti dalykinės srities kalbos kompiliatorių ir sugeneruoti vykdomąjį failą, kuris yra įkeltas kaip išleidimo artefaktas. Taip pat paruošta infrastruktūra, leidžianti automatiškai publikuoti sintaksės ryškinimo įskiepį į \textit{VSCode} įskiepių parduotuvę.
+    } \row
+
+    \veikla{Įrankių testavimas}
+    \aprasymas{
+        \subsubsection{Dalykinės srities kalbos kompiliatoriaus testavimas}
+
+        Šio įrankio testavimui buvo naudojamas automatinis testavimas, kuris buvo integruotas į kodo rašymo procesą -- sukeliant pakeitimą į \textit{GitHub} repozitoriją automatiškai buvo paleidžiami testai, kurie tikrino ar įrankis veikia teisingai. Testavimui buvo naudojama \textit{xUnit.net} testavimo biblioteka, kuri leidžia rašyti ir vykdyti testus \textit{C\#} kalboje. Testavimo procesas apėmė šiuos aspektus:
 
         \begin{itemize}
-            \item Patikrina, ar įskiepio šaltinio kodas atitinka reikalavimus (pvz., ar nėra klaidų, ar laikomasi kodo stiliaus taisyklių).
-            \item Sukompiliuoja įskiepį į reikiamą formatą (\textit{.vsix} failą).
-            \item Automatiškai publikuoja įskiepį į \textit{Visual Studio Code Marketplace}, naudojant \textit{vsce} įrankį ir \textit{Personal Access Token} (PAT), kuris yra saugomas kaip \textit{GitHub Secrets}.
+            \item Lekserio ir parserio komponentų testavimas - buvo sukurti testai, kurie tikrino ar lekseris ir parseris teisingai atpažįsta ir apdoroja taisyklių sakinius.
+            \item Modulių ir sąsajų apjungimo bei semantinio korektiškumo patikros komponentų testavimas - buvo sukurti testai, kurie tikrino ar šie komponentai teisingai apdoroja modulius ir sąsajas, bei ar jie teisingai atlieka semantinį korektiškumą
         \end{itemize}
 
-        Darbo srauto konfigūracija buvo aprašyta \textit{YAML} formatu. Pavyzdys, kaip atrodo šis darbo srautas:
+        Įrankis taip pat buvo testuojamas rankiniu būdu, kad būtų galima patikrinti ar jis teisingai veikia su realiais taisyklių pavyzdžiais.
 
-        \begin{minted}{yaml}
-        name: Publish logis-lang
-        on: workflow_dispatch
+        \subsubsection{Sintaksės ryškinimo įskiepio testavimas}
 
-        jobs:
-            publish:
-                name: Publish logis-lang
-                runs-on: ubuntu-latest
-
-                steps:
-                    - name: Checkout repository
-                        uses: actions/checkout@v2
-
-                    - name: Set up Node.js
-                        uses: actions/setup-node@v2
-                        with:
-                            node-version: 22
-
-                    - name: Install dependencies
-                        run: npm install
-
-                    - name: Install vsce
-                        run: npm install -g @vscode/vsce
-
-                    - name: Package extension
-                        run: vsce package
-
-                    - name: Publish extension
-                        run: vsce publish --allow-missing-repository --skip-license -p ${{ secrets.PUBLISHER_PERSONAL_ACCESS_TOKEN }}
-        \end{minted}
-
-        Šis darbo srautas užtikrina, kad įskiepis būtų publikuojamas rankiniu būdu paleidus darbo srautą per \textit{GitHub Actions} sąsają. Tokiu būdu vartotojai visada turės prieigą prie naujausios įskiepio versijos.
+        Šiam įrankiui buvo atliekamas minimalus testavimas, todėl, kad jis buvo skirtas tik sintaksės ryškinimui, o ne funkcionalumui. Testavimas buvo atliekamas rankiniu būdu, tikrinant ar visi kalbos elementai yra teisingai paryškinti. Darbo srautas skirtas įskiepio įkėlimui taip pat buvo panaudotas kaip savotiškas testas trivialioms klaidoms rasti.
 
     }
-    \rezultatai{} \row
+    \rezultatai{
+        Paruošta automatinių testų infrastruktūra, kuri leistu testuoti įrankius su kiekvieno kodo pakeitimu. Įrankiai taip pat ištestuoti rankiniu būdu.
+    } \row
+
+    \veikla{Dokumentacijos ruošimas}
+    \aprasymas{
+
+        Šios veiklos tikslas buvo paruošti techninę dokumentacija sukurtiems įrankiams. Dokumentacijos laikymui buvo apsvarstyti du variantai:
+        \begin{itemize}
+            \item Naudoti \textit{Confluence} platformą, kuri jau yra naudojama įmonėje laikyti įvairiai dokumentacijai
+            \item Naudoti \textit{GitHub} platformą ir laikyti dokumentaciją kartu su kodu
+        \end{itemize}
+        Kadangi įrankiai buvo kuriami \textit{GitHub} platformoje, buvo nuspręsta, kad dokumentacija taip pat turėtų būti laikoma šioje platformoje. Tokiu būdu būtų užtikrinta, kad dokumentacija visada būtų prieinama kartu su kodu, o tai palengvintų jos atnaujinimą ir prieinamumą. Dokumentacija buvo paruošta naudojant \textit{Markdown} sintaksę, kuri leidžia lengvai formatuoti tekstą ir kurti struktūrizuotą turinį. Dokumentacijoje buvo aprašyti visi įrankiai, jų funkcijos, diegimo procesas bei naudojimo instrukcijos, tačiau daugiausia dėmesio buvo skiriama dalykinės srities kalbai, jos gramatikai, semantinėms taisyklėms.
+    }
+    \rezultatai{
+        Sukurta techninė dokumentacija, apimanti visus įrankius, jų funkcijas, diegimo procesą bei naudojimo instrukcijas. Dokumentacija paruošta naudojant \textit{Markdown} sintaksę ir laikoma \textit{GitHub} platformoje kartu su kodu.
+    } \row
 
     % template
     % \veikla{}
