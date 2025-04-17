@@ -64,7 +64,7 @@
             \item Sintaksės ryškinimo įskiepis teksto redaktoriui \textit{VSCode} - jį būtų galima atsisiųsti per \textit{VSCode} įskiepių naršyklę. Visi \textit{VSCode} įskiepiai yra įgyvendinami naudojant \textit{TypeScript} kalbą, todėl šis įskiepis irgi nėra išimtis
         \end{itemize}
 
-        \subsubsection{Dalykinės srities kompiliatoriaus architektūra}
+        \subsubsection*{Dalykinės srities kompiliatoriaus architektūra}
 
         Taisyklių kompiliatoriaus funkcija yra sukompiliuoti nurodytą profilį - visus modulius ir sąsajas, kurias jis aprašo. Iš poreikio sintaksės bei semantinių klaidų tikrinimui taip pat galime įvertinti, kad kompiliatoriuje turės būti lekserio bei parserio komponentai, kurie failuose parašytas taisykles galėtų suvesti į abstrakčios sintaksės medžio struktūra, kuriai būtų galima vykdyti korektiškumo tikrinimą. Šio proceso rezultatas yra vienas failas, kuriame informacija yra saugoma specifiniu formatu, kuris nėra aktualus šiai ataskaitai, tačiau ši dalis reikalaus komponento, kuris abstraktų sintaksės medį paverstų į minėta formatą. Aprašyta kompiliatoriaus darbo eiga nurodyta \ref{fig:compiler-flow}-ame pavyzdyje.
 
@@ -96,20 +96,20 @@
 
         Iš technologinės pusės šie moduliai nėra ypatingi, jų įgyvendinimui buvo taikomi standartinės imperatyvaus programavimo kalbų struktūros ir algoritmai.
     
-        \subsubsection{Sintaksės ryškinimo įskiepis}
+        \subsubsection*{Sintaksės ryškinimo įskiepis}
 
-        \textit{VSCode} ekosistema suteikia visus reikiamus įrankius kurti pritaikytus sintaksės ryškinimo įrankius. Tai galima padaryti deklaratyviu stiliumi aprašant visų atpažįstamų žetonų formatą \textit{Regex} formatu. Visa ši konfigūracija laikoma viename \textit{JSON} formato faile. Kaip sukonfiguruotas raktažodžių bei konstantinių simbolių eilučių ryškinimas pavaizduota \ref{fig:theme-config-keyword}-ame bei \ref{fig:theme-config-string} pavyzdžiuose. Kaip atrodo galutinis sintaksės ryškinimo rezultatas teksto redaktoriuje \textit{VSCode} galima matyti \ref{fig:themed-logis-code}-ame pavyzdyje.
+        \textit{VSCode} ekosistema suteikia visus reikiamus įrankius kurti pritaikytus sintaksės ryškinimo įrankius. Tai galima padaryti deklaratyviu stiliumi aprašant visų atpažįstamų žetonų formatą \textit{Regex} formatu. Visa ši konfigūracija laikoma viename \textit{JSON} formato faile. Kaip sukonfiguruotas raktažodžių bei konstantinių simbolių eilučių ryškinimas pavaizduota \ref{fig:theme-config-keyword}-ame bei \ref{fig:theme-config-string}-ame pavyzdžiuose. Kaip atrodo galutinis sintaksės ryškinimo rezultatas teksto redaktoriuje \textit{VSCode} galima matyti \ref{fig:themed-logis-code}-ame pavyzdyje.
 
         \begin{figure}
             \centering
-            \includegraphics[width=\textwidth]{images/string-config.png}
+            \includegraphics[width=\textwidth]{images/keyword-config.png}
             \caption{Konfigūracija raktažodžių ryškinimui \textit{VSCode} teksto redaktoriuje}
             \label{fig:theme-config-keyword}
         \end{figure}
 
         \begin{figure}
             \centering
-            \includegraphics[width=\textwidth]{images/keyword-config.png}
+            \includegraphics[width=\textwidth]{images/string-config.png}
             \caption{Konfigūracija konstatinių simbolių eilučių ryškinimui \textit{VSCode} teksto redaktoriuje}
             \label{fig:theme-config-string}
         \end{figure}
@@ -131,21 +131,21 @@
 
         Diegimo infrastruktūra abiems įrankiams buvo paruošta naudojant \textit{GitHub} platformą, kuri leidžia automatizuoti diegimo procesus naudojant \textit{GitHub Actions} funkcionalumą. Ši platforma leidžia kurti automatizuotus darbo srautus (\textit{angl. workflows}), kurie gali būti paleidžiami automatiškai arba rankiniu būdu. \textit{GitHub Actions} leidžia aprašyti darbo srautus naudojant \textit{YAML} sintaksę, kas leidžia lengvai konfigūruoti ir valdyti automatizuotus procesus.
 
-        \subsubsection{Dalykinės srities kompiliatoriaus diegimo infrastruktūra}
+        \subsubsection*{Dalykinės srities kompiliatoriaus diegimo infrastruktūra}
 
-        Šiam įrankiui buvo paruoštas rankiniu būdu paleidžiamas darbo srautas, kuris nukopijuoja repozitorijoje esantį kodą, jį sukompiliuoja ir sugeneruoja vykdomąjį failą kartu su reikalingomis dinaminėmis bibliotekomis. Šie failai yra įkelti kaip vienas išleidimo artefaktas (\textit{angl. release artifact}), kurį vartotojai gali atsisiųsti iš \textit{GitHub} platformos. Tokiu būdu užtikrinama, kad visada būtų prieinamas naujausias įrankio variantas, o diegimo procesas būtų paprastas ir efektyvus. 
+        Šiam įrankiui buvo paruoštas rankiniu būdu paleidžiamas darbo srautas, kuris nukopijuoja repozitorijoje esantį kodą, jį sukompiliuoja ir sugeneruoja vykdomąjį failą kartu su reikalingomis dinaminėmis bibliotekomis. Šie failai yra įkelti kaip vienas artefaktas (\textit{angl. release artifact}), kurį vartotojai gali atsisiųsti iš \textit{GitHub} platformos. Tokiu būdu užtikrinama, kad visada būtų prieinamas naujausias įrankio variantas, o diegimo procesas būtų paprastas ir efektyvus. 
 
-        \subsubsection{Sintaksės ryškinimo įskiepio diegimo infrastruktūra}
+        \subsubsection*{Sintaksės ryškinimo įskiepio diegimo infrastruktūra}
 
         Šiam įrankiui taip pat buvo paruoštas rankiniu būdu paleidžiamas darbo srautas, kuris publikuoja įskiepį į \textit{Visual Studio Code Marketplace} parduotuvę. 
 
     } \rezultatai{
-        Paruošta infrastruktūra, leidžianti automatizuoti dalykinės srities kalbos kompiliatoriaus ir sintaksės ryškinimo įskiepio diegimo procesą. Sukurtas \textit{GitHub Actions} darbo srautas, leidžiantis sukompiliuoti dalykinės srities kalbos kompiliatorių ir sugeneruoti vykdomąjį failą, kuris yra įkeltas kaip išleidimo artefaktas. Taip pat paruošta infrastruktūra, leidžianti automatiškai publikuoti sintaksės ryškinimo įskiepį į \textit{VSCode} įskiepių parduotuvę.
+        Paruošta infrastruktūra, leidžianti automatizuoti dalykinės srities kalbos kompiliatoriaus ir sintaksės ryškinimo įskiepio diegimo procesą. Sukurtas \textit{GitHub Actions} darbo srautas, leidžiantis sukompiliuoti dalykinės srities kalbos kompiliatorių ir sugeneruoti vykdomąjį failą, kuris yra įkeltas kaip artefaktas. Taip pat paruošta infrastruktūra, leidžianti automatiškai publikuoti sintaksės ryškinimo įskiepį į \textit{VSCode} įskiepių parduotuvę.
     } \row
 
     \veikla{Įrankių testavimas}
     \aprasymas{
-        \subsubsection{Dalykinės srities kalbos kompiliatoriaus testavimas}
+        \subsubsection*{Dalykinės srities kalbos kompiliatoriaus testavimas}
 
         Šio įrankio testavimui buvo naudojamas automatinis testavimas, kuris buvo integruotas į kodo rašymo procesą -- sukeliant pakeitimą į \textit{GitHub} repozitoriją automatiškai buvo paleidžiami testai, kurie tikrino ar įrankis veikia teisingai. Testavimui buvo naudojama \textit{xUnit.net} testavimo biblioteka, kuri leidžia rašyti ir vykdyti testus \textit{C\#} kalboje. Testavimo procesas apėmė šiuos aspektus:
 
@@ -156,7 +156,7 @@
 
         Įrankis taip pat buvo testuojamas rankiniu būdu, kad būtų galima patikrinti ar jis teisingai veikia su realiais taisyklių pavyzdžiais.
 
-        \subsubsection{Sintaksės ryškinimo įskiepio testavimas}
+        \subsubsection*{Sintaksės ryškinimo įskiepio testavimas}
 
         Šiam įrankiui buvo atliekamas minimalus testavimas, todėl, kad jis buvo skirtas tik sintaksės ryškinimui, o ne funkcionalumui. Testavimas buvo atliekamas rankiniu būdu, tikrinant ar visi kalbos elementai yra teisingai paryškinti. Darbo srautas skirtas įskiepio įkėlimui taip pat buvo panaudotas kaip savotiškas testas trivialioms klaidoms rasti.
 

@@ -1,0 +1,439 @@
+namespace logis.module.reverse.reverse_du;
+prefix REVERSE_DU;
+implements logis.interface.reverse.reverse_du_pagal_formule;
+implements logis.interface.reverse.reverse_du;
+
+imports logis.interface.reverse.reverse_du_input;
+imports logis.interface.du.mokesciai.mokesc_tarifai;
+imports logis.interface.du.mokesciai.npd_formule_input;
+imports logis.interface.du.mokesciai.npd_formule;
+imports logis.interface.utils.kalendorius;
+
+%========================================================%
+%===== Atbulinio skaičiavimo parametrų skaičiavimas =====%
+
+% Bruto dalys:
+
+%% Atbulinio DU skaičiavimo parametras B_A (DU bruto dalis A apmokestinama normalų DU GPM tarifu)
+rule SumInt PARAM_B_A = [ REVERSE_DU_BRUTO_DALIS_A ];
+
+%% Atbulinio DU skaičiavimo parametras B_L (DU bruto dalis L apmokestinama pagal Ligos GPM traifą)
+rule SumInt PARAM_B_L = [ REVERSE_DU_BRUTO_DALIS_L ];
+
+%% Atbulinio DU skaičiavimo parametras N_y (DU neto dalis B su pritaikytu papildomo draudimo mokesčiu)
+rule SumInt PARAM_N_Y = [ REVERSE_DU_NETO_DALIS_B_SU_PD ];
+
+%% Atbulinio DU skaičiavimo parametras N'_z (DU neto dalis C be pritaikyto papildomo draudimo mokesčio)
+rule SumInt PARAM_N_Z1 = [ REVERSE_DU_NETO_DALIS_C_BE_PD ];
+
+%% Atbulinio DU skaičiavimo parametras R - visas Neto "Į rankas", į kurį įeina ir ligos ir atostoginių dalys, bet neįeina pajamos natūra
+rule SumInt PARAM_R = [ REVERSE_DU_I_RANKAS ];
+
+%% Atbulinio DU skaičiavimo parametras Rpd - visas Neto "Į rankas", nuo kurių dar nenuskaityti mokesč. papild. draud., ir į kurį įeina ir ligos ir atostoginių dalys, bet neįeina pajamos natūra
+rule SumInt PARAM_R_PD = [ REVERSE_DU_I_RANKAS_PD ];
+
+%% Atbulinio DU skaičiavimo parametras B_N_d (DU bruto dalis N - pajamos natūra, už kurią mokesčius moka darbuotojas)
+rule SumInt PARAM_B_N_D = [ REVERSE_PAJAMOS_NATURA_MOK_DARBUOTOJO ];
+
+%% Atbulinio DU skaičiavimo parametras B_N_i  (DU bruto dalis N - pajamos natūra, už kurią mokesčius moka darbdavys - įmonė)
+rule SumInt PARAM_B_N_I = [ REVERSE_PAJAMOS_NATURA_MOK_DARBDAVIO ];
+
+%% Atbulinio DU skaičiavimo parametras KT (Kitos pajamos įtakojančios NPD)
+rule SumInt PARAM_KT = [ NPD_KITOS_PAJAMOS ];
+
+% Koeficientai:
+
+%% Atbulinio DU skaičiavimo koeficientas k_D (GPM tarifas normaliam DU)
+rule DateInt PARAM_K_D = [ MOKEST_GPM_DU / 100 ];
+
+%% Atbulinio DU skaičiavimo koeficientas k_A (GPM tarifas normliam DU ar atostogoms)
+rule DateInt PARAM_K_A = [ MOKEST_GPM_DU / 100 ];
+
+%% Atbulinio DU skaičiavimo koeficientas k_L (GPM tarifas daliai L - ligai)
+rule DateInt PARAM_K_L = [ MOKEST_GPM_NE_DU / 100 ];
+
+%% Atbulinio DU skaičiavimo koeficientas k_S (soc. draudimo mokestis mokamas darbuotojo)
+rule DateInt PARAM_K_S = [ MOKEST_SODRA_DU_DARBUOT / 100 ];
+
+%% Atbulinio DU skaičiavimo koeficientas k_p (papildomo draudimo mokestis)
+rule DateInt PARAM_K_P = [ MOKEST_SODRA_DU_PAPILD_DRAUD / 100 ];
+
+%========================================================%
+%===== Tarpinių išskaičiuotų parametrų skaičiavimas =====%
+
+% Išskaičiuoti tarpiniai parametrai (priklausantys nuo NPD formulės):
+
+%% Atbulinio DU skaičiavimo NPD parametras p4 = p1 + p2*p3
+rule DateInt {#NpdFormule}_PARAM_p4 = 
+	[ {#NpdFormule}_PARAM_p1 +( {#NpdFormule}_PARAM_p2 * {#NpdFormule}_PARAM_p3 ) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo NPD  parametras p5 = 1 + p2
+rule DateInt {#NpdFormule}_PARAM_p5 = 
+	[ 1 + {#NpdFormule}_PARAM_p2 ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo NPD parametras p6 = p4 - p2*KT, kur KT - KITOS_PAJAMOS
+rule IntervalInt {#NpdFormule}_PARAM_p6 = 
+	[ {#NpdFormule}_PARAM_p4 - ( {#NpdFormule}_PARAM_p2 * PARAM_KT ) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo NPD parametras p7 = p6 +BNi, kur BNi - DU bruto dalis N - pajamos natūra, už kurią mokesčius moka darbdavys - įmonė
+rule IntervalInt {#NpdFormule}_PARAM_p7 = 
+	[ {#NpdFormule}_PARAM_p6 + PARAM_B_N_I ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo parametras p8 = p6 + BNi  - p5*q4
+rule IntervalInt {#NpdFormule}_PARAM_p8 = 
+	[ {#NpdFormule}_PARAM_p6 + PARAM_B_N_I - ( {#NpdFormule}_PARAM_p5 * PARAM_q4 ) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+% Išskaičiuoti tarpiniai parametrai (nepriklausantys nuo NPD formulės):
+
+%% Atbulinio DU skaičiavimo parametras q1 = 1 - ks - kp
+rule IntervalInt PARAM_q1 = [ 1 - PARAM_K_S - PARAM_K_P ];
+
+%% Atbulinio DU skaičiavimo parametras q3 = kA*BA + kL*BL + kD*DNd
+rule IntervalInt PARAM_q3 = [ (PARAM_K_A * PARAM_B_A) + (PARAM_K_L * PARAM_B_L) + (PARAM_K_D * PARAM_B_N_D) ];
+
+%% Atbulinio DU skaičiavimo parametras q4 = BA + BL + BNd + BNi
+rule IntervalInt PARAM_q4 = [ PARAM_B_A + PARAM_B_L + PARAM_B_N_D + PARAM_B_N_I ];
+
+%% Atbulinio DU skaičiavimo parametras q5 = BL - (ks + kp) *BNd
+rule IntervalInt PARAM_q5 = [ PARAM_B_L - (PARAM_K_S + PARAM_K_P) * PARAM_B_N_D ];
+
+%% Atbulinio DU skaičiavimo parametras q6 = q4 - BNi
+rule IntervalInt PARAM_q6 = [ PARAM_q4 - PARAM_B_N_I ];
+
+%% Atbulinio DU skaičiavimo parametras q7 = q4 - Ny - N'z
+rule IntervalInt PARAM_q7 = [ PARAM_q4 - PARAM_N_Y - PARAM_N_Z1 ];
+
+% Išskaičiuoti tarpiniai parametrai (pasiruošimas kvadratinėms lygtims):
+
+%% Atbulinio DU skaičiavimo parametras d
+rule IntervalInt {#NpdFormule}_PARAM_d;
+%% Parametras pagal formulę d = q1*(q6 + BA) - q3*p5 + q5 + kd*p8
+{#NpdFormule}_PARAM_d = 
+	[ (PARAM_q1 * (PARAM_q6 + PARAM_B_A)) - (PARAM_q3 * {#NpdFormule}_PARAM_p5) 
+		+ PARAM_q5 + (PARAM_K_D * {#NpdFormule}_PARAM_p8) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo parametras e
+rule IntervalInt {#NpdFormule}_PARAM_e;
+%% Parametras pagal formulę e = (q1*BA + q5) * q6 + p8*q3
+{#NpdFormule}_PARAM_e = 
+	[ ( ((PARAM_q1 * PARAM_B_A) + PARAM_q5) * PARAM_q6 ) + ({#NpdFormule}_PARAM_p8 * PARAM_q3) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%===============================================%
+%===== Apytikslio parametro Z skaičiavimas =====%
+
+%% Atbulinio DU santykio parametrų suma N_y + N'_z
+rule IntervalInt PARAM_N_Y_PLUS_N_Z1 = [ PARAM_N_Y + PARAM_N_Z1 ];
+
+%% Apytikslis parametras z - Bruto dalis nuo Neto dalies C (be pritaikyto papildomo draudimo mokesčio)
+rule IntervalInt PARAM_APYTIKSLIS_Z default [ 0 ];
+%% Apskaičiuotas apytikslis z, lyg nebūtų taikomas NPD
+PARAM_APYTIKSLIS_Z = [ PARAM_N_Z1 / (1 - PARAM_K_D - PARAM_K_S) ];
+
+%% Atbulinio DU skaičiavimo apytikslis santykio parametras r_z
+rule IntervalInt PARAM_r_z default [ 0 ];
+%% Apytikslis santykio parametras r_z
+PARAM_r_z = 
+	if	[ PARAM_N_Y_PLUS_N_Z1 > 0 ]
+		[ 1 - ( PARAM_N_Y / ( PARAM_N_Y_PLUS_N_Z1 - (PARAM_K_P * PARAM_APYTIKSLIS_Z) ) ) ];
+
+%=================================================================================================%
+%===== Kvadratinė lygtis ax^2 + bx + c = 0 - kai skaičiuojama pagal atskiras Bruto-Neto dalis =====%
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas a''= a + a' * r_z  = q1 - k_D*p5 + k_p * r_z
+rule IntervalInt {#NpdFormule}_PARAM_a = 
+	[ PARAM_q1 - ( PARAM_K_D * {#NpdFormule}_PARAM_p5 ) + (PARAM_K_P * PARAM_r_z) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas b''= b + b' * r_z = q1*q6 -(Ny + N'z) + (p7 - p5*q4)*k_d + q6 * k_p * r_z
+rule IntervalInt {#NpdFormule}_PARAM_b = 
+	[ (PARAM_q1 * PARAM_q6) - PARAM_N_Y_PLUS_N_Z1
+		+( ( {#NpdFormule}_PARAM_p7 - ({#NpdFormule}_PARAM_p5 * PARAM_q4) ) * PARAM_K_D ) + (PARAM_q6 * PARAM_K_P * PARAM_r_z) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas c = -(Ny + N'z)*q6
+rule IntervalInt {#NpdFormule}_PARAM_c = 
+	[ - PARAM_N_Y_PLUS_N_Z1 * PARAM_q6 ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% NPD skaičiavimo kvadratinės lygties Diskriminantas D = b2 - 4ac
+rule IntervalInt {#NpdFormule}_PARAM_DISKR = 
+	[ ({#NpdFormule}_PARAM_b * {#NpdFormule}_PARAM_b) - (4 * {#NpdFormule}_PARAM_a * {#NpdFormule}_PARAM_c) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Kvadratinės lygties didesnioji šaknis X2 = ( -b + sqrt(D) ) / 2a
+rule IntervalInt {#NpdFormule}_SAKNIS_X2_PAGAL_DALIS = 
+	[ (- {#NpdFormule}_PARAM_b + Sqrt( {#NpdFormule}_PARAM_DISKR) ) / (2 * {#NpdFormule}_PARAM_a) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%=================================================================================================================================================================================%
+%===== Kvadratinė lygtis a1x^2 + b1x + c1 = 0 - kai skaičiuojama pagal visą Į Rankas, kur jau nuskaityti papild. draud. (Bruto liga ir atostoginiai yra viso Į Rankas dalis) =====%
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas a1 = q1 - k_D*p5
+rule IntervalInt {#NpdFormule}_PARAM_a1 = 
+	[ PARAM_q1 - (PARAM_K_D * {#NpdFormule}_PARAM_p5) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas b1 = d − R
+rule IntervalInt {#NpdFormule}_PARAM_b1 = 
+	[ {#NpdFormule}_PARAM_d - PARAM_R ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas c1 = e - R*q6
+rule IntervalInt {#NpdFormule}_PARAM_c1 = 
+	[ {#NpdFormule}_PARAM_e - (PARAM_R * PARAM_q6) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Kvadratinės lygties (skaičiuojant pagal "Į Ranakas" su nuskaitytais papild. draud.) Diskriminantas D1 = b12 - 4 a1 c1
+rule IntervalInt {#NpdFormule}_PARAM_DISKR1 = 
+	[ ({#NpdFormule}_PARAM_b1 * {#NpdFormule}_PARAM_b1) - (4 * {#NpdFormule}_PARAM_a1 * {#NpdFormule}_PARAM_c1) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Kvadratinės lygties (skaičiuojant pagal "Į Ranakas" su nuskaitytais papild. draud.) didesnioji šaknis X2 = (-b1+sqrt(D1)) / 2a1
+rule IntervalInt {#NpdFormule}_SAKNIS_X2_PAGAL_NETO = 
+	[ (- {#NpdFormule}_PARAM_b1 + Sqrt( {#NpdFormule}_PARAM_DISKR1) ) / (2 * {#NpdFormule}_PARAM_a1) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%===================================================================================================================================================================================%
+%===== Kvadratinė lygtis a2x^2 + b2x + c2 = 0 - kai skaičiuojama pagal visą Į Rankas, kur dar nenuskaityit papild. draud. (Bruto liga ir atostoginiai yra viso Į Rankas dalis) =====%
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas a2 = a + kp = q1 - k_D*p5 + kp
+rule IntervalInt {#NpdFormule}_PARAM_a2 = 
+	[ PARAM_q1 - (PARAM_K_D * {#NpdFormule}_PARAM_p5) + PARAM_K_P ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas b2 = d − Rbp + kp * (q4 + q6 − BL)
+rule IntervalInt {#NpdFormule}_PARAM_b2 = 
+	[ {#NpdFormule}_PARAM_d - PARAM_R_PD + ( PARAM_K_P * (PARAM_q4 + PARAM_q6 - PARAM_B_L) ) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Atbulinio DU skaičiavimo kvadratinės lygties koeficientas c2 = e − Rbp * q6 + kp * (q4 − BL) * q6
+rule IntervalInt {#NpdFormule}_PARAM_c2 = 
+	[ {#NpdFormule}_PARAM_e - (PARAM_R_PD * PARAM_q6) + ( PARAM_K_P * (PARAM_q4 - PARAM_B_L) * PARAM_q6 ) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Kvadratinės lygties (skaičiuojant pagal "Į Ranakas" su nenuskaitytais papild. draud.) Diskriminantas D2 = b22 - 4 a2 c2
+rule IntervalInt {#NpdFormule}_PARAM_DISKR2 = 
+	[ ({#NpdFormule}_PARAM_b2 * {#NpdFormule}_PARAM_b2) - (4 * {#NpdFormule}_PARAM_a2 * {#NpdFormule}_PARAM_c2) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Kvadratinės lygties (skaičiuojant pagal "Į Ranakas" su nenuskaitytais papild. draud.) didesnioji šaknis X2 = (-b2+sqrt(D2)) / 2a2
+rule IntervalInt {#NpdFormule}_SAKNIS_X2_PAGAL_NETO_BE_PD = 
+	[ (- {#NpdFormule}_PARAM_b2 + Sqrt( {#NpdFormule}_PARAM_DISKR2) ) / (2 * {#NpdFormule}_PARAM_a2) ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%=============================================================================%
+%===== Skaičiavimas kuri formulė (pagal NPD formulę) turėtų būti taikoma =====%
+
+% Kokios gaunasi atskyros bruto dalys ir NPD taikant pasirinktą formulę:
+
+%% Bruto suma suskaičiuota nuo Neto dalių (B+C) suskaičiuota pagal NPD formulę (neatsižvelgiant ar NPD suma viršija Bruto)
+rule PeriodInt {#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE;
+%% Kvadratinės lygties šaknis X2 (didesnioji) - skaičiuojant pagal atskiras dalis
+{#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE = T_{#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_DALIS 
+	if	[ REVERSE_MODE = "PAGAL_DALIS" ]
+		[ {#NpdFormule}_SAKNIS_X2_PAGAL_DALIS ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+%% Kvadratinės lygties šaknis X2 (didesnioji) - skaičiuojant pagal visą Neto (su išskaičiuotais papild. draud. mokesčiais)
+{#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE = T_{#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_DU_I_RANKAS 
+	if	[ REVERSE_MODE = "PAGAL_DU_I_RANKAS" ]
+		[ {#NpdFormule}_SAKNIS_X2_PAGAL_NETO ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+%% Kvadratinės lygties šaknis X2 (didesnioji) - skaičiuojant pagal visą Neto (be išskaičiuotų papild. draud. mokesčių)
+{#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE = T_{#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_DU_I_RANKAS_PD 
+	if	[ REVERSE_MODE = "PAGAL_DU_I_RANKAS_PD" ]
+		[ {#NpdFormule}_SAKNIS_X2_PAGAL_NETO_BE_PD ]
+	from	[ {#NpdFormule.hasGaliojaNuo} ]
+	to		[ {#NpdFormule.hasGaliojaIki} ];
+
+%% Visa Bruto suma (nuo visų atskirų dalių) suskaičiuota pagal NPD formulę (neatsižvelgiant ar NPD suma viršija Bruto) - Kvadratinės lygties šaknis X2 (didesnioji) + q4
+rule {#NpdFormuleNevirsijaBruto}_REV_BRUTO_PAGAL_FORMULE =
+	[ {#NpdFormuleNevirsijaBruto}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE + PARAM_q4 ]
+  from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+%% Visas DU Bruto, kai suskaičiuota NPD suma pagal formulę viršija DU Bruto - vadratinės lygties šaknis X2 (didesnioji) + q4
+rule IntervalInt DU_BRUTO_KAI_NPD_SUMA_VIRS_BRUTO =
+	[ {#NpdFormuleVirsijaBruto}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE + PARAM_q4 ];
+
+% instantiates generuojamiems parametrams:
+{#NpdFormuleNevirsijaBruto}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE instantiates {#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE;
+{#NpdFormuleVirsijaBruto}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE instantiates {#NpdFormule}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE;
+
+{#NpdFormuleNevirsijaBruto}_PARAM_p1 instantiates {#NpdFormule}_PARAM_p1 from logis.interface.du.mokesciai.npd_formule;
+{#NpdFormuleNevirsijaBruto}_PARAM_p2 instantiates {#NpdFormule}_PARAM_p2 from logis.interface.du.mokesciai.npd_formule;
+{#NpdFormuleNevirsijaBruto}_PARAM_p3 instantiates {#NpdFormule}_PARAM_p3 from logis.interface.du.mokesciai.npd_formule;
+NPD_FORMULE_STR_{#NpdFormuleNevirsijaBruto.npdBazineFormule} instantiates NPD_FORMULE_STR_{#NpdFormuleBazine} from logis.interface.du.mokesciai.npd_formule;
+
+%% Kokios būtų pajamos NPD skaičiavimu, jeigu būtų pritaikyta ši {#NpdFormuleNevirsijaBruto} NPD formulė
+rule PeriodInt {#NpdFormuleNevirsijaBruto}_PAJAMOS_NPD_TAIKYMUI = 
+  [ {#NpdFormuleNevirsijaBruto}_REV_BRUTO_PAGAL_FORMULE + PARAM_KT ]
+  from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+%% Kokia būtų NPD suma suskaičiuota pagal šią {#NpdFormuleNevirsijaBruto} NPD formulę
+rule {#NpdFormuleNevirsijaBruto}_REV_NPD_SUMA_PAGAL_FORMULE = 
+  [ {#NpdFormuleNevirsijaBruto}_PARAM_p1 -({#NpdFormuleNevirsijaBruto}_PARAM_p2 * ({#NpdFormuleNevirsijaBruto}_PAJAMOS_NPD_TAIKYMUI - {#NpdFormuleNevirsijaBruto}_PARAM_p3) ) ]
+  from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+% Požymis, ar formulė turėtų būti taikoma (neatsižvelgiant ar NPD suma viršija Bruto):
+literal {#NpdFormuleNevirsijaBruto.npdTaikomaNuo};
+literal {#NpdFormuleNevirsijaBruto.npdTaikomaIki};
+literal {#NpdFormuleNevirsijaBruto.isNpdFiksuotas};
+
+%% Požymis (skaitinis) ar formulė atitinka MIN taikymo sąlygą
+rule IntervalInt {#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_NPD_SUMA_NUO_INT default [ 1 ] = 
+	if	[ {#NpdFormuleNevirsijaBruto.npdTaikomaNuo} > {#NpdFormuleNevirsijaBruto}_PAJAMOS_NPD_TAIKYMUI ]
+		[ 0 ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+%% Požymis (skaitinis) ar formulė atitinka MAX taikymo sąlygą
+rule IntervalInt {#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_NPD_SUMA_IKI_INT default [ 1 ] = 
+	if	[ {#NpdFormuleNevirsijaBruto}_PAJAMOS_NPD_TAIKYMUI >= {#NpdFormuleNevirsijaBruto.npdTaikomaIki} ]
+		[ 0 ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+
+% Pastaba: atbulinis skaičiavimas neturi atskiro mode'o,
+% kuris vykdytų skaičiavimą netaikant NPD.
+% "Netaikomas NPD" yra tas pats, kas ir "Fiksuotas NPD = 0",
+% todėl atbuliniame skaičiavime fiksuoto NPS formulė naudojama ir kai reikia netaikyti NPD apskritai:
+
+%% Požymis ar turi būti taikoma fiksuotas NPD skaičiuojant atbulinį
+rule DateBool ATBULINIAM_TAKYTI_FIKSUOTA_NPD default [ false ] =
+	[ !REVERSE_NPD_TAIKOMAS_SKAICIAVIME || NPD_TAIKYTI_FIKSUOTA_SUMA ];
+
+
+%% Požymis (realizuotas Int tipo parametru) ar ši formlė turi būti taikoma (neatsižvelgiant ar NPD suma viršija Bruto)
+rule IntervalInt {#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_INT default [ 0 ] initial [ 1 ];
+{#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_INT *= T_{#NpdFormuleNevirsijaBruto}_R_FORMULE_TAIKOMA_INT_FIKSUOTA_SUMA 
+	if	[ {#NpdFormuleNevirsijaBruto.isNpdFiksuotas} != ATBULINIAM_TAKYTI_FIKSUOTA_NPD ]
+		[ 0 ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+{#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_INT *= T_{#NpdFormuleNevirsijaBruto}_R_FORMULE_TAIKOMA_INT_NPD_SUMA_NUO 
+	[ {#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_NPD_SUMA_NUO_INT ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+{#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_INT *= T_{#NpdFormuleNevirsijaBruto}_R_FORMULE_TAIKOMA_INT_NPD_SUMA_IKI 
+	[ {#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_NPD_SUMA_IKI_INT ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+% Default reikšmė nurodyta, nes dar užsidės GaliojaNuo - GaliojaIki prie-conditionas:
+
+%% Požymis ar ši formlė turi būti taikoma (neatsižvelgiant ar NPD suma viršija Bruto)
+rule {#NpdFormuleNevirsijaBruto}_REV_FORMULE_TAIKOMA default [ false ] =
+	[ {#NpdFormuleNevirsijaBruto}_FORMULE_TAIKOMA_INT = 1 ]
+	splitby [ MONTHS ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+% Požymis, ar formulė turėtų būti taikoma (atsižvelgiant ar NPD suma viršija Bruto):
+
+%% DU Bruto dalis suskaičiuota pagal Neto dalis (B+C), kai suskaičiuota NPD suma pagal formulę viršija DU Bruto
+rule IntervalInt DU_BRUTO_DALIS_PAGAL_NETO_KAI_NPD_SUMA_VIRS_BRUTO = [ {#NpdFormuleVirsijaBruto}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE ];
+
+%% Požymis ar NPD suma neviršija Bruto ir dėl to formulė gali būti taikoma
+rule {#NpdFormuleNevirsijaBruto}_REV_NPD_SUMA_NEVIRSIJA_BRUTO =
+	[ {#NpdFormuleNevirsijaBruto}_REV_NPD_SUMA_PAGAL_FORMULE <= {#NpdFormuleNevirsijaBruto}_REV_BRUTO_PAGAL_FORMULE ]
+  from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+%% Pagal Formulę suskaičiuotas DU Bruto visas, atvižvelgiant ar NPD suma neviršija Bruto ar viršija
+rule {#NpdFormuleNevirsijaBruto}_REV_SUSKAICIUTAS_BRUTO;
+{#NpdFormuleNevirsijaBruto}_REV_SUSKAICIUTAS_BRUTO = T_{#NpdFormuleNevirsijaBruto}_REV_SUSKAICIUTAS_BRUTO_NPD_NEVIRSIJA_BRUTO 
+	if	[ {#NpdFormuleNevirsijaBruto}_REV_NPD_SUMA_NEVIRSIJA_BRUTO ]
+		[ {#NpdFormuleNevirsijaBruto}_REV_BRUTO_PAGAL_FORMULE ]
+  from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+{#NpdFormuleNevirsijaBruto}_REV_SUSKAICIUTAS_BRUTO = T_{#NpdFormuleNevirsijaBruto}_REV_SUSKAICIUTAS_BRUTO_NPD_VIRSIJA_BRUTO 
+	if	[ !{#NpdFormuleNevirsijaBruto}_REV_NPD_SUMA_NEVIRSIJA_BRUTO ]
+		[ DU_BRUTO_KAI_NPD_SUMA_VIRS_BRUTO ]
+  from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+%==============================================================%
+%===== Bruto skaičiavimus atsižvelgiant į tinkamą formulę =====%
+
+%% Požymis ar taikyti formulę, kur NPD suma viršija bruto
+rule DateBool TAIKYTI_FORMULE_NPD_VIRS_BRUTO default [ true ] = T_TAIKYTI_FORMULE_NPD_VIRS_BRUTO_{#NpdFormuleNevirsijaBruto} 
+	if	[ {#NpdFormuleNevirsijaBruto}_REV_FORMULE_TAIKOMA ]
+		[ !{#NpdFormuleNevirsijaBruto}_REV_NPD_SUMA_NEVIRSIJA_BRUTO ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+rule REVERSE_DU_SUSKAICIUOTAS_BRUTO;
+REVERSE_DU_SUSKAICIUOTAS_BRUTO = T_REVERSE_DU_SUSKAICIUOTAS_BRUTO_NPD_SUMA_NEVIRS_BRUTO_{#NpdFormuleNevirsijaBruto} 
+	if	[ {#NpdFormuleNevirsijaBruto}_REV_FORMULE_TAIKOMA && !TAIKYTI_FORMULE_NPD_VIRS_BRUTO ]
+		[ {#NpdFormuleNevirsijaBruto}_REV_SUSKAICIUTAS_BRUTO ]
+	splitby [ MONTHS ]
+  from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+REVERSE_DU_SUSKAICIUOTAS_BRUTO = T_REVERSE_DU_SUSKAICIUOTAS_BRUTO_NPD_SUMA_VIRS_BRUTO 
+	if	[ TAIKYTI_FORMULE_NPD_VIRS_BRUTO ]
+		[ DU_BRUTO_KAI_NPD_SUMA_VIRS_BRUTO ]
+	splitby [ MONTHS ];
+
+rule REVERSE_DU_SUSKAICIUOTAS_BRUTO_BE_PAJAMU_NATURA =
+	[ REVERSE_DU_SUSKAICIUOTAS_BRUTO - REVERSE_PAJAMOS_NATURA_MOK_DARBUOTOJO - REVERSE_PAJAMOS_NATURA_MOK_DARBDAVIO];
+
+rule REVERSE_DU_TAIKYTA_NPD_FORMULE = T_REVERSE_DU_TAIKYTA_NPD_FORMULE_{#NpdFormuleNevirsijaBruto} 
+	if	[ {#NpdFormuleNevirsijaBruto}_REV_FORMULE_TAIKOMA ]
+		[ NPD_FORMULE_STR_{#NpdFormuleNevirsijaBruto.npdBazineFormule} ]
+	splitby [ MONTHS ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+
+%==================================================================================%
+%===== Suskaičiuoti duomenys tik skaičiuojant pagal atskiras Bruto-Neto dalis =====%
+
+rule REVERSE_DU_BRUTO_DALIS_PAGAL_NETO;
+REVERSE_DU_BRUTO_DALIS_PAGAL_NETO = T_REVERSE_DU_BRUTO_DALIS_PAGAL_NETO_{#NpdFormuleNevirsijaBruto} 
+	if	[ {#NpdFormuleNevirsijaBruto}_REV_FORMULE_TAIKOMA && !TAIKYTI_FORMULE_NPD_VIRS_BRUTO ]
+		[ {#NpdFormuleNevirsijaBruto}_BRUTO_DALIS_PAGAL_NETO_PAGAL_FORMULE ]
+	splitby [ MONTHS ]
+	from	[ {#NpdFormuleNevirsijaBruto.hasGaliojaNuo} ]
+	to		[ {#NpdFormuleNevirsijaBruto.hasGaliojaIki} ];
+REVERSE_DU_BRUTO_DALIS_PAGAL_NETO = T_REVERSE_DU_BRUTO_DALIS_PAGAL_NETO_NPD_SUMA_VIRS_BRUTO 
+	if	[ TAIKYTI_FORMULE_NPD_VIRS_BRUTO ]
+		[ DU_BRUTO_DALIS_PAGAL_NETO_KAI_NPD_SUMA_VIRS_BRUTO ]
+	splitby [ MONTHS ];
+
+%rule REVERSE_DU_BRUTO_DALIS_PAGAL_NETO_DALI_B_SU_PD = [ (1 - PARAM_r_z) * REVERSE_DU_BRUTO_DALIS_PAGAL_NETO ];
+rule REVERSE_DU_BRUTO_DALIS_PAGAL_NETO_DALI_B_SU_PD = [ REVERSE_DU_BRUTO_DALIS_PAGAL_NETO - REVERSE_DU_BRUTO_DALIS_PAGAL_NETO_DALI_C_BE_PD ];
+
+rule REVERSE_DU_BRUTO_DALIS_PAGAL_NETO_DALI_C_BE_PD = [ PARAM_r_z * REVERSE_DU_BRUTO_DALIS_PAGAL_NETO ];
